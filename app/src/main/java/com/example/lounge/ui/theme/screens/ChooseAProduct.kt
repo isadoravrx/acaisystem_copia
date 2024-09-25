@@ -121,7 +121,7 @@ fun HeaderSection(onBackClick: () -> Unit) {
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.Bottom,
 
-                ) {
+            ) {
                 Text(
                     text = "Escolha um produto",
                     color = Color.White,
