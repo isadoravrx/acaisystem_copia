@@ -23,8 +23,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,12 +35,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.lounge.R
 import com.example.lounge.ui.theme.components.BottomTotalButton
-import com.example.lounge.ui.theme.components.ItemBox
+import com.example.lounge.ui.theme.components.VitaminaESucoBox
 
 @Composable
-fun ChooseAProduct(navController: NavHostController) {
-    val (selectedItem, setSelectedItem) = remember { mutableStateOf<String?>(null) }
-
+fun SucoScreen(navController: NavHostController) {
     Scaffold { padding ->
         Column(
             modifier = Modifier
@@ -52,30 +48,22 @@ fun ChooseAProduct(navController: NavHostController) {
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             // Logo Section
-            HeaderSection( onBackClick = {
-                navController.navigate("home")
-            } )
+            HeaderSuco(onBackClick = {
+                navController.navigate("chooseAProduct")
+            })
 
             // Button Section
-            ItemBox(onItemSelected = { selectedItem ->
-                setSelectedItem(selectedItem)
-            })
+            VitaminaESucoBox()
 
             //
-            BottomTotalButton(total = "R$ 00,00", onContinueClick =  {
-                if (selectedItem == "Vitamina") {
-                    navController.navigate("vitaminaScreen")
-                } else if (selectedItem == "Suco") {
-                    navController.navigate("sucoScreen")
-
-                }
-            })
+            BottomTotalButton(total = "R$ 00,00") {
+            }
         }
     }
 }
 
 @Composable
-fun HeaderSection(onBackClick: () -> Unit) {
+fun HeaderSuco(onBackClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -129,7 +117,8 @@ fun HeaderSection(onBackClick: () -> Unit) {
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .padding(start = 16.dp)
-                        .paddingFromBaseline(top = 30.dp),style = MaterialTheme.typography.titleMedium
+                        .paddingFromBaseline(top = 30.dp),
+                    style = MaterialTheme.typography.titleMedium
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Image(
