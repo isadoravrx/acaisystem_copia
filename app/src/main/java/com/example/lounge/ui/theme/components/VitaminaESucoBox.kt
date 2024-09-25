@@ -14,17 +14,14 @@ import androidx.compose.ui.unit.dp
 import com.example.lounge.R
 
 @Composable
-fun ItemBox(onItemSelected: (String) -> Unit) {
+fun VitaminaESucoBox() {
     // Estado que mantém o item selecionado
     val (selectedItem, setSelectedItem) = remember { mutableStateOf<String?>(null) }
 
     // Lista de itens
     val items = listOf(
-        ItemData(R.drawable.acai, "Açaí"),
-        ItemData(R.drawable.cupuacu, "Cupuacu"),
-        ItemData(R.drawable.cupuacu_e_acai, "Cupuacu e açaí"),
-        ItemData(R.drawable.vitamina, "Suco"),
-        ItemData(R.drawable.vitamina_1, "Vitamina"),
+        ItemData(R.drawable.vitamina, "Açaí"),
+        ItemData(R.drawable.vitamina_1, "Cupuacu"),
     )
 
     // Layout de exibição dos itens
@@ -36,15 +33,12 @@ fun ItemBox(onItemSelected: (String) -> Unit) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            items.take(3).forEach { item ->
+            items.take(1).forEach { item ->
                 ItemCard(
                     imageResId = item.imageResId,
                     description = item.description,
                     selected = selectedItem == item.description,
-                    onSelect = {
-                        setSelectedItem(item.description)
-                        onItemSelected(item.description) // Chama a função de navegação
-                    }
+                    onSelect = { setSelectedItem(item.description) }
                 )
             }
         }
@@ -55,14 +49,13 @@ fun ItemBox(onItemSelected: (String) -> Unit) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            items.drop(3).forEach { item ->
+            items.drop(1).forEach { item ->
                 ItemCard(
                     imageResId = item.imageResId,
                     description = item.description,
                     selected = selectedItem == item.description,
                     onSelect = {
                         setSelectedItem(item.description)
-                        onItemSelected(item.description) // Chama a função de navegação
                     }
                 )
             }
@@ -70,4 +63,4 @@ fun ItemBox(onItemSelected: (String) -> Unit) {
     }
 }
 
-data class ItemData(val imageResId: Int, val description: String)
+//data class ItemData(val imageResId: Int, val description: String)

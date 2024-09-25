@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "lounge"
 include(":app")
+include(":projeto-de-desenvolvimento-2024-2-acaisystem")
