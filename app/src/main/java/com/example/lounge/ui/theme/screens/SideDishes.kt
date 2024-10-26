@@ -24,7 +24,9 @@ import com.example.lounge.ui.theme.components.BottomTotalButton
 import com.example.lounge.ui.theme.components.ItemBox
 
 @Composable
-fun SideDishes(navController: NavHostController) {
+fun SideDishes(navController: NavHostController, acaiVolume: Int) {
+    val acaiVolume = 200  // Exemplo de volume em mL
+    val freeItemsLimit = getFreeItemsLimit(acaiVolume)
     var selectedItemsCount by remember { mutableStateOf(0) }
     var totalPrice by remember { mutableStateOf(0.00) }
 
@@ -44,14 +46,20 @@ fun SideDishes(navController: NavHostController) {
             // Seção para a lista de opções
             ItemSelectionSection(
                 selectedItemsCount = selectedItemsCount,
-                onItemAdded = {
-                    selectedItemsCount++
-                    totalPrice += 2.00 // Suponha que cada adição acrescente R$ 2.00
+                onItemAdded = { price ->
+                    if (selectedItemsCount < 5){ // Limite máximo de 5 acompanhamentos
+                        selectedItemsCount++
+                        if (selectedItemsCount > freeItemsLimit) { // Cobrar adicional se exceder o limite
+                            totalPrice += price
+                        }
+                    }
                 },
-                onItemRemoved = {
+                onItemRemoved = { price ->
                     if (selectedItemsCount > 0) {
+                        if (selectedItemsCount > freeItemsLimit) { // Remover custo adicional
+                            totalPrice -= price
+                        }
                         selectedItemsCount--
-                        totalPrice -= 2.00
                     }
                 }
             )
@@ -61,6 +69,17 @@ fun SideDishes(navController: NavHostController) {
                 // ESPAÇO PARA A PRÓXIMA TELA
             }
         }
+    }
+}
+
+// Define o limite de acompanhamentos gratuitos com base no volume do açaí
+fun getFreeItemsLimit(acaiVolume: Int): Int {
+    return when (acaiVolume) {
+        200 -> 2
+        300 -> 3
+        400 -> 4
+        500, 750 -> 5
+        else -> 0 // Caso não seja um valor reconhecido
     }
 }
 
@@ -97,9 +116,25 @@ fun HeaderSectionSideDishes(onBackClick: () -> Unit) {
 
 @Composable
 fun ItemSelectionSection(
+    freeItemsLimit: Int,
     selectedItemsCount: Int,
-    onItemAdded: () -> Unit,
-    onItemRemoved: () -> Unit
+    selectedItemsCount = selectedItemsCount,
+    onItemAdded = {
+        if (selectedItemsCount < freeItemsLimit) {
+            selectedItemsCount++
+        } else {
+            selectedItemsCount++
+            totalPrice += 2.00
+        }
+    },
+    onItemRemoved = {
+        if (selectedItemsCount > 0) {
+            if (selectedItemsCount > freeItemsLimit) {
+                totalPrice -= 2.00
+            }
+            selectedItemsCount--
+        }
+    }
 ) {
     Column(
         modifier = Modifier
@@ -115,33 +150,47 @@ fun ItemSelectionSection(
         )
         Text(text = "R$ 20", fontSize = 18.sp, fontWeight = FontWeight.Medium)
 
-        // Lista de itens
-        Text(text = "Acompanhamentos $selectedItemsCount/3", fontSize = 16.sp, modifier = Modifier.padding(vertical = 8.dp))
+        // Mostra o limite de acompanhamentos e quantos já foram selecionados
+        Text(text = "Acompanhamentos $selectedItemsCount/$freeItemsLimit grátis", fontSize = 16.sp, modifier = Modifier.padding(vertical = 8.dp))
 
-        // Linha dos Acompanhamentos
-        ItemRow("Amendoim", onItemAdded = onItemAdded, onItemRemoved = onItemRemoved)
-        ItemRow("Amendoim Triturado", onItemAdded = onItemAdded, onItemRemoved = onItemRemoved)
-        ItemRow("Aveia", onItemAdded = onItemAdded, onItemRemoved = onItemRemoved)
-        ItemRow("Banana", onItemAdded = onItemAdded, onItemRemoved = onItemRemoved)
-        ItemRow("Bolinhas de Nescau", onItemAdded = onItemAdded, onItemRemoved = onItemRemoved)
-        ItemRow("Farinha Láctea", onItemAdded = onItemAdded, onItemRemoved = onItemRemoved)
-        ItemRow("Farinha de Amendoim", onItemAdded = onItemAdded, onItemRemoved = onItemRemoved)
-        ItemRow("Farinha de Castanha", onItemAdded = onItemAdded, onItemRemoved = onItemRemoved)
-        ItemRow("Granola", onItemAdded = onItemAdded, onItemRemoved = onItemRemoved)
-        ItemRow("Leite Condensado", onItemAdded = onItemAdded, onItemRemoved = onItemRemoved)
-        ItemRow("Leite em pó", onItemAdded = onItemAdded, onItemRemoved = onItemRemoved)
-        ItemRow("Mel", onItemAdded = onItemAdded, onItemRemoved = onItemRemoved)
-        ItemRow("Sucrilhos", onItemAdded = onItemAdded, onItemRemoved = onItemRemoved)
+        LazyColumn {
+            items(getSideDishes()) { item ->
+                ItemRow(item.name, item.price, onItemAdded, onItemRemoved)
+            }
+        }
     }
 }
+
+// Lista de acompanhamentos com nomes e preços
+fun getSideDishes(): List<SideDishItem> {
+    return listOf(
+        SideDishItem("Amendoim", 2.00),
+        SideDishItem("Amendoim Triturado", 2.00),
+        SideDishItem("Aveia", 2.50),
+        SideDishItem("Banana", 2.50),
+        SideDishItem("Bolinhas de Nescau", 3.00),
+        SideDishItem("Farinha Láctea", 3.00),
+        SideDishItem("Farinha de Amendoim", 2.00),
+        SideDishItem("Farinha de Castanha", 3.00),
+        SideDishItem("Granola", 2.50),
+        SideDishItem("Leite Condensado", 3.00),
+        SideDishItem("Leite em pó", 2.50),
+        SideDishItem("Mel", 2.50),
+        SideDishItem("Sucrilhos", 2.00)
+    )
+}
+
+data class SideDishItem(val name: String, val price: Double)
 
 @Composable
 fun ItemRow(
     itemName: String,
+    itemPrice: Double,
     onItemAdded: () -> Unit,
     onItemRemoved: () -> Unit
 ) {
     var itemCount by remember { mutableStateOf(0) }
+    var color by remember { mutableStateOf(Color.Gray) } 
 
     Row(
         modifier = Modifier
@@ -156,15 +205,20 @@ fun ItemRow(
             IconButton(onClick = {
                 if (itemCount > 0) {
                     itemCount--
-                    onItemRemoved()
+                    onItemRemoved(itemPrice)
+                    color = if (itemCount > 0) Color.Green else Color.Red 
                 }
             }) {
                 Text(text = "-", fontSize = 18.sp, fontWeight = FontWeight.Bold)
             }
-            Text(text = itemCount.toString(), modifier = Modifier.padding(horizontal = 8.dp))
+            Text(
+                text = itemCount.toString(),
+                modifier = Modifier.padding(horizontal = 8.dp)
+            )
             IconButton(onClick = {
                 itemCount++
-                onItemAdded()
+                onItemAdded(itemPrice)
+                color = Color.Green
             }) {
                 Text(text = "+", fontSize = 18.sp, fontWeight = FontWeight.Bold)
             }
